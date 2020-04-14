@@ -10,7 +10,7 @@ const noteSchema = new Schema(
         days: { type: Array, required: true },  // 天数列表
         likeCount: { type: Number, default: 0 },
         commentCount: { type: Number, default: 0 },
-        commentList: { type: Array},
+        commentList: { type: Array, default: [] },
         collectCount: { type: Number, default: 0 },
     },
     { timestamps: true }

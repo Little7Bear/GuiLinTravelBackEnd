@@ -1,6 +1,8 @@
 const Note = require("../models/notes");
 const User = require("../models/users");
 const dayjs = require("dayjs");
+const mongoose = require('mongoose');
+const _ = require("lodash");
 // const Day = require("../models/noteDays");
 // const Section = require("../models/noteSections");
 
@@ -153,6 +155,72 @@ class NoteController {
     ctx.body = { code: 0, data: result, total: count }
   }
 
+  async createComment(ctx) {//新增评论
+    const request = ctx.request.body;
+    const oldNote = await Note.findById(ctx.params.id);
+    // 删除
+    if (request.commentId) {
+      _.pull(oldNote.commentList, request.commentId)
+    } else {
+      request.id = mongoose.Types.ObjectId();
+      oldNote.commentList.push(request)
+    }
+
+    let params = {
+      commentList: oldNote.commentList
+    }
+    await Note.findByIdAndUpdate(ctx.params.id, params);
+
+    const note = await Note.findById(ctx.params.id);
+    let res = []
+    for (const comment of note.commentList) {
+      const user = await User.findById(comment.userId)
+      let item = {
+        userId: user._id,
+        username: user.name,
+        avatar_url: user.avatar_url,
+        id: comment.id,
+        text: comment.text,
+        date: comment.date,
+      }
+      res.push(item)
+    }
+    ctx.body = { code: 0, data: res };
+  }
+
+  async findComments(ctx) {//查找所有评论
+    const note = await Note.findById(ctx.params.id);
+    let res = []
+    for (const comment of note.commentList) {
+      const user = await User.findById(comment.userId)
+
+      let item = {
+        userId: user._id,
+        username: user.name,
+        avatar_url: user.avatar_url,
+        id: comment.id,
+        text: comment.text,
+        date: comment.date,
+      }
+      res.push(item)
+    }
+    ctx.body = { code: 0, data: res };
+  }
+
+  async deleteComment(ctx) {//删除评论
+    // const { commentId } = ctx.request.body
+    // const note = await Note.findById(ctx.params.id);
+    // let id = mongoose.Types.ObjectId(commentId)
+    // console.log(id);
+    // _.pull(note.commentList, id)
+    // let params = {
+    //   commentList: note.commentList
+    // }
+    // await Note.findByIdAndUpdate(ctx.params.id, params);
+    console.log(ctx.params.id);
+    console.log('12345646464566666666666666656');
+    ctx.body = { code: 0 };
+  }
 }
 
 module.exports = new NoteController();
