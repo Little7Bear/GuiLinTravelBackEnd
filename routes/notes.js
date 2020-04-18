@@ -11,7 +11,6 @@ const {
   find,
   createComment,
   findComments,
-  deleteComment
 } = require("../controllers/notes");  // 控制器方法
 
 const auth = jwt({ secret });  // jwt鉴权
@@ -28,10 +27,8 @@ router.delete("/:id", auth, del);
 
 router.patch("/:id", auth, update);  // 更新游记信息
 
-router.patch("/comments/:id", auth, createComment);  // 新增评论
+router.patch("/comments/:id", auth, createComment);  // 新增、删除评论
 
 router.get("/comments/:id", auth, findComments);  // 查找所有评论
-
-router.delete("/comments/:id", auth, deleteComment);  // 删除评论
 
 module.exports = router;

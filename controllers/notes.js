@@ -132,7 +132,7 @@ class NoteController {
       .skip(skip);
 
     let result = []
-    notes.forEach(async note => {
+    for (const note of notes) {
       const user = await User.findById(note.userID)
 
       let obj = {
@@ -147,7 +147,7 @@ class NoteController {
         cover: note.days[0].sections[0].url,
       }
       result.push(obj)
-    });
+    }
 
     // 查询总数
     const count = await Note.countDocuments({});
@@ -155,14 +155,18 @@ class NoteController {
     ctx.body = { code: 0, data: result, total: count }
   }
 
-  async createComment(ctx) {//新增评论
+  async createComment(ctx) {//新增、删除评论
     const request = ctx.request.body;
     const oldNote = await Note.findById(ctx.params.id);
-    // 删除
-    if (request.commentId) {
-      _.pull(oldNote.commentList, request.commentId)
-    } else {
-      request.id = mongoose.Types.ObjectId();
+
+    if (request.commentId) {// 删除
+      oldNote.commentList.forEach((note, index) => {
+        if (note.id === request.commentId) {
+          oldNote.commentList.splice(index, 1)
+        }
+      });
+    } else {//新增
+      request.id = oldNote.commentList.length + 1;
       oldNote.commentList.push(request)
     }
 
@@ -171,10 +175,11 @@ class NoteController {
     }
     await Note.findByIdAndUpdate(ctx.params.id, params);
 
-    const note = await Note.findById(ctx.params.id);
+    const note = await Note.findById(ctx.params.id)
     let res = []
     for (const comment of note.commentList) {
-      const user = await User.findById(comment.userId)
+      let userId = mongoose.Types.ObjectId(comment.userId);
+      const user = await User.findById(userId)
       let item = {
         userId: user._id,
         username: user.name,
@@ -185,6 +190,7 @@ class NoteController {
       }
       res.push(item)
     }
+
     ctx.body = { code: 0, data: res };
   }
 
@@ -205,21 +211,6 @@ class NoteController {
       res.push(item)
     }
     ctx.body = { code: 0, data: res };
-  }
-
-  async deleteComment(ctx) {//删除评论
-    // const { commentId } = ctx.request.body
-    // const note = await Note.findById(ctx.params.id);
-    // let id = mongoose.Types.ObjectId(commentId)
-    // console.log(id);
-    // _.pull(note.commentList, id)
-    // let params = {
-    //   commentList: note.commentList
-    // }
-    // await Note.findByIdAndUpdate(ctx.params.id, params);
-    console.log(ctx.params.id);
-    console.log('12345646464566666666666666656');
-    ctx.body = { code: 0 };
   }
 }
 
