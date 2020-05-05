@@ -3,8 +3,6 @@ const User = require("../models/users");
 const dayjs = require("dayjs");
 const mongoose = require('mongoose');
 const _ = require("lodash");
-// const Day = require("../models/noteDays");
-// const Section = require("../models/noteSections");
 
 class NoteController {
   async create(ctx) {  // 创建
@@ -158,7 +156,6 @@ class NoteController {
   async createComment(ctx) {//新增、删除评论
     const request = ctx.request.body;
     const oldNote = await Note.findById(ctx.params.id);
-
     if (request.commentId) {// 删除
       oldNote.commentList.forEach((note, index) => {
         if (note.id === request.commentId) {
@@ -174,41 +171,43 @@ class NoteController {
       commentList: oldNote.commentList
     }
     await Note.findByIdAndUpdate(ctx.params.id, params);
-
     const note = await Note.findById(ctx.params.id)
     let res = []
     for (const comment of note.commentList) {
       let userId = mongoose.Types.ObjectId(comment.userId);
       const user = await User.findById(userId)
-      let item = {
-        userId: user._id,
-        username: user.name,
-        avatar_url: user.avatar_url,
-        id: comment.id,
-        text: comment.text,
-        date: comment.date,
+      if (user) {
+        let item = {
+          userId: user._id,
+          username: user.name,
+          avatar_url: user.avatar_url,
+          id: comment.id,
+          text: comment.text,
+          date: comment.date,
+        }
+        res.push(item)
       }
-      res.push(item)
     }
-
     ctx.body = { code: 0, data: res };
   }
 
   async findComments(ctx) {//查找所有评论
     const note = await Note.findById(ctx.params.id);
+    console.log(note);
     let res = []
     for (const comment of note.commentList) {
       const user = await User.findById(comment.userId)
-
-      let item = {
-        userId: user._id,
-        username: user.name,
-        avatar_url: user.avatar_url,
-        id: comment.id,
-        text: comment.text,
-        date: comment.date,
+      if (user) {
+        let item = {
+          userId: user._id,
+          username: user.name,
+          avatar_url: user.avatar_url,
+          id: comment.id,
+          text: comment.text,
+          date: comment.date,
+        }
+        res.push(item)
       }
-      res.push(item)
     }
     ctx.body = { code: 0, data: res };
   }

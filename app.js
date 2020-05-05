@@ -31,6 +31,7 @@ switch (app.env) {
 }
 mongoose.connection.on("error", console.error);
 
+//token无效
 app.use(function (ctx, next) {
   return next().catch((err) => {
     if (err.status === 401) {
