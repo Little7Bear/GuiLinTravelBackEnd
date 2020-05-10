@@ -141,7 +141,7 @@ class NoteController {
         username: user.name,
         dayTotal: note.days.length,
         likeCount: note.likeCount,
-        commentCount: note.commentCount,
+        commentCount: note.commentList.length,
         cover: note.days[0].sections[0].url,
       }
       result.push(obj)
@@ -193,7 +193,6 @@ class NoteController {
 
   async findComments(ctx) {//查找所有评论
     const note = await Note.findById(ctx.params.id);
-    console.log(note);
     let res = []
     for (const comment of note.commentList) {
       const user = await User.findById(comment.userId)
